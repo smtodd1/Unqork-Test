@@ -20,7 +20,7 @@
     # Create a Kubernetes namespace\
     - name: Create Namespace\
       k8s:\
-        name: "\{{ steve-test \}}"\
+        name: "{{{{ steve-test }}}}"\ 
         api_version: v1\
         kind: Namespace\
         state: present  # Ensure the namespace exists\
