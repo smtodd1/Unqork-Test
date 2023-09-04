@@ -1,0 +1,80 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww37900\viewh19680\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\tx11520\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+---\
+# This Ansible playbook deploys various Kubernetes resources\
+\
+- name: Deploy Kubernetes Resources for Unqork Take Home  \
+  hosts: autopilot-cluster-1  )\
+\
+  tasks:  # List of tasks to execute\
+\
+    # Include existing Kubernetes config, assuming it's stored at the default location\
+    - name: Include Kubernetes Configuration\
+      include_vars:\
+        file: ~/.kube/config \
+        name: UnqorkTakeHome\
+    \
+    # Set a fact for the Kubernetes namespace to be used\
+    - name: Set Kubernetes Namespace\
+      set_fact:\
+        kube_namespace: steve-test\
+\
+    # Create a Kubernetes namespace\
+    - name: Create Namespace\
+      k8s:\
+        name: "\{\{ kube_namespace \}\}"\
+        api_version: v1\
+        kind: Namespace\
+        state: present  # Ensure the namespace exists\
+\
+    # Create a ConfigMap in the defined namespace\
+    - name: Create ConfigMap\
+      k8s:\
+        name: steve-test\
+        namespace: "\{\{ kube_namespace \}\}"\
+        api_version: v1\
+        kind: ConfigMap\
+        state: present  # Ensure the ConfigMap exists\
+        definition:\
+          data:\
+            APP_ENV: "production"\
+            DEBUG: "false"\
+\
+    # Create a Secret in the defined namespace\
+    - name: Create Secret\
+      k8s:\
+        name: Steve key 1\
+        namespace: "\{\{ kube_namespace \}\}"\
+        api_version: v1\
+        kind: Secret\
+        state: present  # Ensure the Secret exists\
+        definition:\
+          data:\
+            API_KEY: "\{\{ 'Steve key 1' | b64encode \}\}"\
+\
+    # Deploy a Redis StatefulSet (this is a placeholder; you'll need to provide an actual definition)\
+    - name: Deploy Redis StatefulSet\
+      k8s:\
+        name: steve-redis\
+        namespace: "\{\{ kube_namespace \}\}"\
+        kind: StatefulSet\
+        state: present\
+        definition:\
+          # StatefulSet: Kubernetes resource object used for deploying and managing stateful applications in a Kubernetes cluster. \
+\
+    # Extra Credit: Deploy a Horizontal Pod Autoscaler \
+    - name: Create Horizontal Pod Autoscaler\
+      k8s:\
+        name: steve-hpa\
+        namespace: "\{\{ kube_namespace \}\}"\
+        api_version: autoscaling/v2beta2\
+        kind: HorizontalPodAutoscaler\
+        state: present\
+        definition:\
+          # HPA: Horizontal Pod Autoscaler in the context of Kubernetes. It's a Kubernetes resource and a component of the Kubernetes Autoscaling mechanism.}
