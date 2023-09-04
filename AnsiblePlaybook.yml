@@ -48,7 +48,7 @@
         state: present  # Ensure the Secret exists\
         definition:\
           data:\
-            API_KEY: "\{{ 'Steve key 1' | b64encode \}}"\
+            API_KEY: "steve-test"\
 \
     # Deploy a Redis StatefulSet (this is a placeholder; you'll need to provide an actual definition)\
     - name: Deploy Redis StatefulSet\
