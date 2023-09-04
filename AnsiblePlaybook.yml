@@ -29,7 +29,7 @@
     - name: Create ConfigMap\
       k8s:\
         name: steve-test\
-        namespace: "\{{ steve-test \}}"\
+        namespace: "{{{{ steve-test }}}}"\
         api_version: v1\
         kind: ConfigMap\
         state: present  # Ensure the ConfigMap exists\
@@ -42,7 +42,7 @@
     - name: Create Secret\
       k8s:\
         name: Steve key 1\
-        namespace: "\{{ steve-test \}}"\
+        namespace: "{{{{ steve-test }}}}"\
         api_version: v1\
         kind: Secret\
         state: present  # Ensure the Secret exists\
@@ -54,7 +54,7 @@
     - name: Deploy Redis StatefulSet\
       k8s:\
         name: steve-redis\
-        namespace: "\{{  steve-test \}}"\
+        namespace: "{{{{ steve-test }}}}"\
         kind: StatefulSet\
         state: present\
         definition:\
@@ -64,7 +64,7 @@
     - name: Create Horizontal Pod Autoscaler\
       k8s:\
         name: steve-hpa\
-        namespace: "\{{ steve-test \}}"\
+        namespace: "{{{{ steve-test }}}}"\
         api_version: autoscaling/v2beta2\
         kind: HorizontalPodAutoscaler\
         state: present\
