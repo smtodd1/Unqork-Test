@@ -1,0 +1,62 @@
+# This Ansible playbook deploys various Kubernetes resources
+- name: Deploy Kubernetes Resources for Unqork Take Home
+
+hosts: https://console.cloud.google.com/kubernetes/clusters/details/us-central1/autopilot-cluster-1/details?project=woven-plane-398019
+   tasks:
+	- name: Include Kubernetes Configuration
+	include_vars:
+	file: 
+	name: UnqorkTakeHome
+
+- name: Set Kubernetes Namespace
+set_fact:
+kube_namespace: steve-test
+
+- name: Create Namespace
+k8s:
+name: "{{kube_namespace}}"
+api_version: v1
+kind: Namespace
+state: present
+
+- name: Create ConfigMap
+k8s:
+name: steve-test
+namespace: "{{kube_namespace}}"
+api_version: v1
+kind: ConfigMap
+state: present
+definition:
+data:
+APP_ENV: "production"
+DEBUG: "false"
+
+- name: Create Secret
+k8s:
+name: Steve-key-1
+namespace: "{{kube_namespace}}"
+api_version: v1
+kind: Secret
+state: present
+definition:
+data:
+API_KEY: "{{'steve-test' | b64encode}}"
+
+- name: Deploy Redis StatefulSet
+k8s:
+name: steve-redis
+namespace: "{{kube_namespace}}"
+kind: StatefulSet
+state: present
+definition:
+# Provide the actual StatefulSet definition here
+
+- name: Create Horizontal Pod Autoscaler
+k8s:
+name: steve-hpa
+namespace: "{{kube_namespace}}"
+api_version: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+state: present
+definition:
+# Provide the actual HPA definition here
