@@ -1,0 +1,101 @@
+- name: Deploy Kubernetes Resources for Unqork Take Home
+  hosts: localhost  # Run tasks on the local machine
+
+  vars:
+    kubeconfig_path: ~/.kube/config  # Path to your Kubernetes configuration file
+
+  tasks:
+    - name: Include Kubernetes Configuration
+      include_vars:
+        file: "{{ kubeconfig_path }}"
+        name: UnqorkTakeHome
+
+    - name: Set Kubernetes Namespace
+      set_fact:
+        kube_namespace: steve-test
+
+    - name: Create Namespace
+      k8s:
+        name: "{{ kube_namespace }}"
+        namespace: "{{ kube_namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+
+    - name: Create ConfigMap
+      k8s:
+        name: steve-test
+        namespace: "{{ kube_namespace }}"
+        api_version: v1
+        kind: ConfigMap
+        state: present
+        definition:
+          data:
+            APP_ENV: "production"
+            DEBUG: "false"
+
+    - name: Create Secret
+      k8s:
+        name: stevekey1
+        namespace: "{{ kube_namespace }}"
+        api_version: v1
+        kind: Secret
+        state: present
+        definition:
+          data:
+            API_KEY: "{{ 'steve-test' | b64encode }}"
+
+    - name: Deploy Redis StatefulSet
+      k8s:
+        name: steve-redis
+        namespace: "{{ kube_namespace }}"
+        kind: StatefulSet
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: StatefulSet
+          metadata:
+            name: steve-redis
+            namespace: "{{ kube_namespace }}"
+          spec:
+            replicas: 3  # Adjust the number of replicas as needed
+            selector:
+              matchLabels:
+                app: redis
+            template:
+              metadata:
+                labels:
+                  app: redis
+              spec:
+                containers:
+                  - name: redis
+                    image: redis:latest
+                    ports:
+                      - containerPort: 6379
+                        name: redis
+
+    - name: Create Horizontal Pod Autoscaler
+      k8s:
+        name: steve-hpa
+        namespace: "{{ kube_namespace }}"
+        api_version: autoscaling/v1
+        kind: HorizontalPodAutoscaler
+        state: present
+        definition:
+          apiVersion: autoscaling/v1
+          kind: HorizontalPodAutoscaler
+          metadata:
+            name: steve-hpa
+            namespace: "{{ kube_namespace }}"
+          spec:
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment  # Adjust this to your actual resource
+              name: autopilot-cluster-1  # Specify the name of the resource to scale
+            minReplicas: 1
+            maxReplicas: 5  # Adjust min and max replicas as needed
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  targetAverageUtilization: 50
